@@ -3,6 +3,9 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // 使用相对路径，确保直接双击打开 dist/index.html 时资源路径正确（file:// 协议）
+  base: './',
+
   // 让 Vite 把 .pkpass / .pkpasses 当作静态资源处理（支持 ?url 导入）
   assetsInclude: ['**/*.pkpass', '**/*.pkpasses'],
 
