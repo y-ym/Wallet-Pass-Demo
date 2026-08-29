@@ -18,12 +18,14 @@ import { useCallback } from 'react'
 import bayroastPassUrl from './pass/BayroastCoffee.pkpass?url'
 import benignoPassUrl from './pass/BenignoAlbertoEsparzaInzunza.pkpass?url'
 import nwordPassUrl from './pass/N_Word.pkpass?url'
+import pkpassesUrl from './pass/pkpasses.pkpasses?url'
 
 // ── Apple Wallet pass 文件列表（随机选一个） ──
 const APPLE_PASSES = [
   { url: bayroastPassUrl, name: 'BayroastCoffee.pkpass' },
   { url: benignoPassUrl, name: 'BenignoAlbertoEsparzaInzunza.pkpass' },
   { url: nwordPassUrl, name: 'N_Word.pkpass' },
+  { url: pkpassesUrl, name: 'pkpasses.pkpasses' },
 ] as const
 
 // ── Google Wallet JWT URL 列表（随机选一个） ──
@@ -210,6 +212,11 @@ function App() {
           <GoogleIcon />
           Add to Google Wallet
         </button>
+        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}>
+          <li>
+            <strong>提示</strong>：点击没反应请检查一下当前网络能不能打开Google
+          </li>
+          </ul>
       </div>
 
       {/* ── 注意事项 ── */}
