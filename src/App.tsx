@@ -352,28 +352,6 @@ function App() {
           </li>
         </ul>
       </div>
-
-      {/* ── 注意事项 ── */}
-      <div style={{ ...s.card, background: '#f6f8fa' }}>
-        <div style={s.cardTitle}>💡 注意事项</div>
-        <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}>
-          <li>
-            <strong>Apple Wallet</strong>：.pkpass 需由 Apple 颁发的证书签名才能真正添加；
-            测试文件为示例，iOS 可能提示「无效证书」
-          </li>
-          <li>
-            <strong>Google Wallet</strong>：JWT 需在 Google Wallet Console
-            预注册 Class/Object，点击按钮后会跳转 Google 确认页
-          </li>
-          <li>
-            <strong>生产场景</strong>：按设备分流，iOS 只展示 Apple 按钮，Android 只展示
-            Google 按钮；Demo 中两个按钮同时展示方便调试
-          </li>
-          <li>
-            <strong>微信 iOS</strong>：点击 Apple Wallet 按钮后需在 Safari 中打开才能完成添加
-          </li>
-        </ul>
-      </div>
     </div>
   )
 }
