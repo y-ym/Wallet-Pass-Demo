@@ -54,7 +54,16 @@ function detectEnv() {
   // 微信 / 微博 / QQ / Facebook / Instagram / Line / TikTok 等 App 内置 WebView
   const isInApp =
     /MicroMessenger|weibo|QQ\/|FBAV|FBAN|Instagram|Line\/|TikTok/i.test(ua)
-  return { ua, isIOS, isAndroid, isInApp }
+  // iOS Safari 识别：含 Safari/ 且不含第三方浏览器标识
+  // CriOS=Chrome, FxiOS=Firefox, EdgiOS=Edge, OPiOS=Opera, GSA=Google App
+  const isIOSSafari =
+    isIOS &&
+    /Safari/i.test(ua) &&
+    !/CriOS|FxiOS|EdgiOS|OPiOS|GSA/i.test(ua) &&
+    !isInApp
+  // iOS 非 Safari（需要引导用户在 Safari 中打开）
+  const isIOSNonSafari = isIOS && !isIOSSafari
+  return { ua, isIOS, isAndroid, isInApp, isIOSSafari, isIOSNonSafari }
 }
 
 // ── 图标组件 ──
@@ -90,6 +99,160 @@ function GoogleIcon() {
   )
 }
 
+// ── iOS 非 Safari 引导页 ──
+
+function SafariGuide() {
+  return (
+    <div style={sg.wrap}>
+      {/* Safari 图标 */}
+      <div style={sg.iconWrap}>
+        <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+          <rect width="72" height="72" rx="16" fill="url(#safariGrad)" />
+          {/* 指南针外圆 */}
+          <circle cx="36" cy="36" r="22" stroke="white" strokeWidth="1.5" fill="none" opacity="0.4" />
+          {/* 指针 */}
+          <polygon points="36,16 40,36 36,32 32,36" fill="white" />
+          <polygon points="36,56 32,36 36,40 40,36" fill="white" opacity="0.5" />
+          {/* 中心点 */}
+          <circle cx="36" cy="36" r="2.5" fill="white" />
+          <defs>
+            <linearGradient id="safariGrad" x1="0" y1="0" x2="72" y2="72">
+              <stop offset="0%" stopColor="#1fa7f8" />
+              <stop offset="100%" stopColor="#0d6efd" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <h2 style={sg.title}>请在 Safari 中打开</h2>
+      <p style={sg.subtitle}>
+        添加卡券到 Apple Wallet 仅支持 Safari 浏览器
+      </p>
+
+      {/* 步骤说明 */}
+      <div style={sg.stepsCard}>
+        <div style={sg.step}>
+          <span style={sg.stepNum}>1</span>
+          <span style={sg.stepText}>
+            点击底部工具栏的
+            <span style={sg.highlight}>「分享」</span>按钮
+            <ShareIcon />
+          </span>
+        </div>
+        <div style={sg.divider} />
+        <div style={sg.step}>
+          <span style={sg.stepNum}>2</span>
+          <span style={sg.stepText}>
+            在弹出菜单中选择
+            <span style={sg.highlight}>「在 Safari 中打开」</span>
+          </span>
+        </div>
+      </div>
+
+      <p style={sg.tip}>
+        * 如使用微信，请点击右上角 ··· 菜单后选择「在 Safari 中打开」
+      </p>
+    </div>
+  )
+}
+
+/** iOS 分享按钮图标 */
+function ShareIcon() {
+  return (
+    <svg
+      width="14" height="14" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+      style={{ display: 'inline', verticalAlign: 'middle', marginLeft: 3 }}
+    >
+      <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+      <polyline points="16 6 12 2 8 6" />
+      <line x1="12" y1="2" x2="12" y2="15" />
+    </svg>
+  )
+}
+
+/** SafariGuide 专用样式 */
+const sg: Record<string, React.CSSProperties> = {
+  wrap: {
+    minHeight: '100svh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '40px 24px',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    background: '#f2f2f7',
+    textAlign: 'center',
+  },
+  iconWrap: {
+    marginBottom: 24,
+    filter: 'drop-shadow(0 8px 16px rgba(0,122,255,.25))',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 700,
+    color: '#1d1d1f',
+    margin: '0 0 10px',
+    letterSpacing: -0.3,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#6e6e73',
+    margin: '0 0 32px',
+    lineHeight: 1.5,
+  },
+  stepsCard: {
+    width: '100%',
+    maxWidth: 340,
+    background: '#fff',
+    borderRadius: 14,
+    padding: '4px 0',
+    boxShadow: '0 1px 4px rgba(0,0,0,.08)',
+    marginBottom: 20,
+  },
+  step: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 14,
+    padding: '16px 20px',
+    textAlign: 'left',
+  },
+  stepNum: {
+    width: 26,
+    height: 26,
+    borderRadius: '50%',
+    background: '#007aff',
+    color: '#fff',
+    fontSize: 13,
+    fontWeight: 700,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  } as React.CSSProperties,
+  stepText: {
+    fontSize: 15,
+    color: '#1d1d1f',
+    lineHeight: 1.5,
+  },
+  highlight: {
+    color: '#007aff',
+    fontWeight: 600,
+  },
+  divider: {
+    height: 1,
+    background: '#f2f2f7',
+    margin: '0 20px',
+  },
+  tip: {
+    fontSize: 12,
+    color: '#aeaeb2',
+    maxWidth: 300,
+    lineHeight: 1.6,
+    margin: 0,
+  },
+}
+
 // ── 工具小组件 ──
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -123,40 +286,31 @@ function DeviceTag({ color, children }: { color: string; children: React.ReactNo
 // ── 主组件 ──
 
 function App() {
-  const { ua, isIOS, isAndroid, isInApp } = detectEnv()
+  const { ua, isIOS, isAndroid, isIOSNonSafari } = detectEnv()
 
-  /**
-   * 点击 Apple Wallet 按钮：随机选一个 .pkpass，用 window.location.href 触发下载。
-   * ⚠️ 必须用 window.location.href，不能用 fetch + blob URL：
-   *    iOS 对 blob URL 的 MIME 处理不可靠，直接赋值 href 才能让 Safari 弹出 PassKit 框。
-   */
   const handleAppleWallet = useCallback(() => {
     window.location.href = randomItem(APPLE_PASSES).url
   }, [])
 
-  /**
-   * 点击 Google Wallet 按钮：随机选一个 JWT URL，跳转到 Google Wallet 确认页。
-   */
   const handleGoogleWallet = useCallback(() => {
     window.location.href = randomItem(GOOGLE_WALLET_URLS)
   }, [])
 
+  // iOS 非 Safari：整页替换为引导页，不展示任何功能内容
+  if (isIOSNonSafari) {
+    return <SafariGuide />
+  }
+
   // 设备标签显示
   let deviceLabel = 'PC / Desktop'
   let deviceColor = '#8c8c8c'
-  if (isIOS && isInApp) {
-    deviceLabel = 'iOS · App 内浏览器'
-    deviceColor = '#e6a817'
-  } else if (isIOS) {
-    deviceLabel = 'iOS · Safari / Chrome'
+  if (isIOS) {
+    deviceLabel = 'iOS · Safari'
     deviceColor = '#007aff'
   } else if (isAndroid) {
     deviceLabel = 'Android'
     deviceColor = '#34a853'
   }
-
-  // Apple Wallet 按钮在 iOS App 内浏览器中禁用（需引导跳 Safari）
-  const appleDisabled = isIOS && isInApp
 
   return (
     <div style={s.page}>
@@ -176,30 +330,10 @@ function App() {
         </InfoRow>
       </div>
 
-      {/* ── iOS App 内浏览器警告（微信 / FB 等） ── */}
-      {isIOS && isInApp && (
-        <div style={{ ...s.card, background: '#fffbe6', borderLeft: '4px solid #faad14' }}>
-          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.8 }}>
-            ⚠️ <strong>检测到 iOS App 内置浏览器</strong>
-            <br />
-            Apple Wallet 仅在 <strong>Safari</strong> 中可用。
-            <br />
-            请点击右上角菜单 →「<strong>在 Safari 中打开</strong>」后再添加。
-          </p>
-        </div>
-      )}
-
       {/* ── Apple Wallet 区域 ── */}
       <div style={s.card}>
         <div style={s.cardTitle}>🍎 Apple Wallet</div>
-        <button
-          style={{
-            ...s.appleBtn,
-            ...(appleDisabled ? s.disabledBtn : {}),
-          }}
-          onClick={handleAppleWallet}
-          disabled={appleDisabled}
-        >
+        <button style={s.appleBtn} onClick={handleAppleWallet}>
           <AppleIcon />
           Add to Apple Wallet
         </button>
