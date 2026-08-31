@@ -15,16 +15,16 @@
 import { useCallback } from 'react'
 
 // ── Apple Wallet：用 Vite ?url 导入，构建时自动处理文件哈希 ──
-import bayroastPassUrl from './pass/BayroastCoffee.pkpass?url'
-import benignoPassUrl from './pass/BenignoAlbertoEsparzaInzunza.pkpass?url'
-import nwordPassUrl from './pass/N_Word.pkpass?url'
+// import bayroastPassUrl from './pass/BayroastCoffee.pkpass?url'
+// import benignoPassUrl from './pass/BenignoAlbertoEsparzaInzunza.pkpass?url'
+// import nwordPassUrl from './pass/N_Word.pkpass?url'
 import pkpassesUrl from './pass/pkpasses.pkpasses?url'
 
 // ── Apple Wallet pass 文件列表（随机选一个） ──
 const APPLE_PASSES = [
-  { url: bayroastPassUrl, name: 'BayroastCoffee.pkpass' },
-  { url: benignoPassUrl, name: 'BenignoAlbertoEsparzaInzunza.pkpass' },
-  { url: nwordPassUrl, name: 'N_Word.pkpass' },
+  // { url: bayroastPassUrl, name: 'BayroastCoffee.pkpass' },
+  // { url: benignoPassUrl, name: 'BenignoAlbertoEsparzaInzunza.pkpass' },
+  // { url: nwordPassUrl, name: 'N_Word.pkpass' },
   { url: pkpassesUrl, name: 'pkpasses.pkpasses' },
 ] as const
 
@@ -350,7 +350,7 @@ function App() {
           <li>
             <strong>提示</strong>：点击没反应请检查一下当前网络能不能打开Google
           </li>
-          </ul>
+        </ul>
       </div>
 
       {/* ── 注意事项 ── */}
