@@ -18,14 +18,15 @@ import { useCallback } from 'react'
 // import bayroastPassUrl from './pass/BayroastCoffee.pkpass?url'
 // import benignoPassUrl from './pass/BenignoAlbertoEsparzaInzunza.pkpass?url'
 // import nwordPassUrl from './pass/N_Word.pkpass?url'
-import pkpassesUrl from './pass/pkpasses.pkpasses?url'
+import KPayPassUrl from './pass/KPayPass.pkpass?url'
+// import pkpassesUrl from './pass/pkpasses.pkpasses?url'
 
 // ── Apple Wallet pass 文件列表（随机选一个） ──
 const APPLE_PASSES = [
   // { url: bayroastPassUrl, name: 'BayroastCoffee.pkpass' },
   // { url: benignoPassUrl, name: 'BenignoAlbertoEsparzaInzunza.pkpass' },
   // { url: nwordPassUrl, name: 'N_Word.pkpass' },
-  { url: pkpassesUrl, name: 'pkpasses.pkpasses' },
+  { url: KPayPassUrl, name: 'KPayPass.pkpass' },
 ] as const
 
 // ── Google Wallet JWT URL 列表（随机选一个） ──
