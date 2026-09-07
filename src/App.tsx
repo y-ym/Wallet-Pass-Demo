@@ -69,6 +69,35 @@ function detectEnv() {
   return { ua, isIOS, isAndroid, isInApp, isIOSSafari, isIOSNonSafari }
 }
 
+/**
+ * 纯前端 Blob 方案：fetch 文件后以指定 MIME 构造 Blob，再用 <a download> 触发下载。
+ * - 桌面 / Android：download 属性控制下载文件名与后缀（filename 需带扩展名）；
+ * - iOS Safari：不支持 download 属性，回退为 location.href 跳转（行为与弹 Wallet 一致）。
+ */
+async function openPassWithMime(url: string, mime: string, filename?: string) {
+  const resp = await fetch(url)
+  if (!resp.ok) throw new Error(`fetch failed: ${resp.status} ${url}`)
+  const buf = await resp.arrayBuffer()
+  const blob = new Blob([buf], { type: mime })
+  const blobUrl = URL.createObjectURL(blob)
+
+  // iOS Safari 不支持 <a download>，回退为直接跳转
+  if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) {
+    window.location.href = blobUrl
+    return
+  }
+
+  const a = document.createElement('a')
+  a.href = blobUrl
+  if (filename) a.download = filename
+  a.rel = 'noopener'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  // 延迟释放 blob URL，确保下载已开始
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
+}
+
 // ── 图标组件 ──
 
 function AppleIcon() {
@@ -292,29 +321,39 @@ function App() {
   const { ua, isIOS, isAndroid, isIOSNonSafari } = detectEnv()
 
   const handleAppleWallet = useCallback(() => {
-    window.location.href = KPayPassesUrl
+    void openPassWithMime(
+      KPayPassesUrl,
+      'application/vnd.apple.pkpasses',
+      'KPayPass.pkpasses',
+    )
   }, [])
 
   const handleAppleWallet1 = useCallback(() => {
-    window.location.href = KPayPassUrl
+    void openPassWithMime(KPayPassUrl, 'application/vnd.apple.pkpass', 'KPayPass.pkpass')
   }, [])
 
   const handleAppleWallet2 = useCallback(() => {
-    window.location.href = KPayPassErrorUrl
+    void openPassWithMime(
+      KPayPassErrorUrl,
+      'application/vnd.apple.pkpass',
+      'KPayPassError.pkpass',
+    )
   }, [])
 
   const handleAppleWallet3 = useCallback(() => {
-    // 故意在 URL 上附加 ?mime=application/octet-stream，
-    // 让开发服务器返回错误的 Content-Type（非 application/vnd.apple.pkpass）
-    // 用于实测 iOS Safari 收到错误 MIME 时的真实表现
-    window.location.href = `${KPayPassUrl}?mime=application/octet-stream`
+    // 纯前端 Blob 方案：以 application/octet-stream 触发，
+    // 实测 iOS Safari 收到 octet-stream MIME 时的真实表现
+    void openPassWithMime(
+      KPayPassUrl,
+      'application/octet-stream',
+      'KPayPass.pkpass',
+    )
   }, [])
 
   const handleAppleWallet4 = useCallback(() => {
-    // 故意在 URL 上附加 ?mime=application/zip，
-    // 让开发服务器返回 Content-Type: application/zip
-    // 用于实测 iOS Safari 收到 zip MIME 时是否/如何唤醒 Wallet 弹框
-    window.location.href = `${KPayPassUrl}?mime=application/zip`
+    // 纯前端 Blob 方案：以 application/zip 触发，
+    // 实测 iOS Safari 收到 zip MIME 时的真实表现
+    void openPassWithMime(KPayPassUrl, 'application/zip', 'KPayPass.pkpass')
   }, [])
 
   // const handleGoogleWallet = useCallback(() => {
@@ -388,7 +427,7 @@ function App() {
           <AppleIcon />
           Add to Apple Wallet
         </button>
-        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Content-Type 非 application/vnd.apple.pkpass（返回 application/octet-stream）。实测：iOS 仍会唤醒 Wallet 弹框——Safari 会按 .pkpass 扩展名兜底识别；仅部分 iOS 版本表现为"转为下载文件"</div>
+        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Blob 指定 MIME 为 application/octet-stream（非 application/vnd.apple.pkpass）。实测：iOS 仍会唤醒 Wallet 弹框——Safari 会按 .pkpass 扩展名兜底识别；仅部分 iOS 版本表现为"转为下载文件"</div>
       </div>
 
       <div style={s.card}>
@@ -397,7 +436,7 @@ function App() {
           <AppleIcon />
           Add to Apple Wallet
         </button>
-        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Content-Type 非 application/vnd.apple.pkpass（返回 application/zip）。实测观察：iOS 是否仍唤醒 Wallet 弹框 / 是否转为下载 .zip 归档</div>
+        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Blob 指定 MIME 为 application/zip（非 application/vnd.apple.pkpass）</div>
       </div>
 
       {/* ── Google Wallet 区域 ── */}
