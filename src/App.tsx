@@ -19,30 +19,32 @@ import { useCallback } from 'react'
 // import benignoPassUrl from './pass/BenignoAlbertoEsparzaInzunza.pkpass?url'
 // import nwordPassUrl from './pass/N_Word.pkpass?url'
 import KPayPassUrl from './pass/KPayPass.pkpass?url'
+import KPayPassesUrl from './pass/KPayPass.pkpasses?url'
+import KPayPassErrorUrl from './pass/KPayPassError.pkpass?url'
 // import pkpassesUrl from './pass/pkpasses.pkpasses?url'
 
 // ── Apple Wallet pass 文件列表（随机选一个） ──
-const APPLE_PASSES = [
-  // { url: bayroastPassUrl, name: 'BayroastCoffee.pkpass' },
-  // { url: benignoPassUrl, name: 'BenignoAlbertoEsparzaInzunza.pkpass' },
-  // { url: nwordPassUrl, name: 'N_Word.pkpass' },
-  { url: KPayPassUrl, name: 'KPayPass.pkpass' },
-] as const
+// const APPLE_PASSES = [
+//   // { url: bayroastPassUrl, name: 'BayroastCoffee.pkpass' },
+//   // { url: benignoPassUrl, name: 'BenignoAlbertoEsparzaInzunza.pkpass' },
+//   // { url: nwordPassUrl, name: 'N_Word.pkpass' },
+//   { url: KPayPassUrl, name: 'KPayPass.pkpass' },
+// ] as const
 
 // ── Google Wallet JWT URL 列表（随机选一个） ──
 // JWT 1 & 2：包含 offerObjects（优惠券）
 // JWT 3 & 4：包含 loyaltyObjects（会员卡）
-const GOOGLE_WALLET_URLS = [
-  'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5Nzc1NTcsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsib2ZmZXJPYmplY3RzIjpbeyJpZCI6IjMzODgwMDAwMDAwMDM2NTg4OTEuMURvMFVBTDMwajZ0ekVGc1MzWEI0UCJ9XX0sInR5cCI6InNhdmV0b2FuZHJvaWRwYXkifQ.DhDPawNY7ncDjtLqWlez9iFU9gPwcWjUxHR8JYlqtLZu_Y7ei-iKH61MzXmXq0IS48R-lAVSJca5RHa5h16qyFkMQPtkww4y7VEWofbJdfTsCdR5Ec7QkVapA_od89LttnSjdSFZ1yZOKq_5PkWTVx9F7h6s7rs9t4MXzV5NGq9WdcvPLvcKoR3Y_ZtokVrQS6nb32nCc5RqUNWjaFj_M1AolWClmtZNLkbp-tb2hkBDLN_kwF83acStS70tlEIqym9i72RAQCzYoq-sawCfrHHFLLFG8Q6vchITXOFjShAh_uvGLSJkGp2Z4Auh-GOfZbavpYi_lMvLYmxSc6I-ng',
-  'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5Nzc1NTcsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsib2ZmZXJPYmplY3RzIjpbeyJpZCI6IjMzODgwMDAwMDAwMDM2NTg4OTEuMURvMFVBTDMwajZ0ekVGc1MzWEI0UCJ9XX0sInR5cCI6InNhdmV0b2FuZHJvaWRwYXkifQ.DhDPawNY7ncDjtLqWlez9iFU9gPwcWjUxHR8JYlqtLZu_Y7ei-iKH61MzXmXq0IS48R-lAVSJca5RHa5h16qyFkMQPtkww4y7VEWofbJdfTsCdR5Ec7QkVapA_od89LttnSjdSFZ1yZOKq_5PkWTVx9F7h6s7rs9t4MXzV5NGq9WdcvPLvcKoR3Y_ZtokVrQS6nb32nCc5RqUNWjaFj_M1AolWClmtZNLkbp-tb2hkBDLN_kwF83acStS70tlEIqym9i72RAQCzYoq-sawCfrHHFLLFG8Q6vchITXOFjShAh_uvGLSJkGp2Z4Auh-GOfZbavpYi_lMvLYmxSc6I-ng',
-  'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5Nzc4MzgsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsibG95YWx0eU9iamVjdHMiOlt7ImlkIjoiMzM4ODAwMDAwMDAwMzY1ODg5MS41dlNKWDZsYzNjNXhzUUdMWVR0aFhVIn1dfSwidHlwIjoic2F2ZXRvYW5kcm9pZHBheSJ9.P0A12aP2VQVFp1LklEHDkHs0zl-c7mzGxsW0yyOeKGZp1S5YUwYfWQ3wsqSN28ONz3nKeFJowx-8Aks1VU-KiZ4AaqyTx1po8IIr_siJrvnRQAtXDcNffU-jHJXgkgQi8jUD9CM6wvXtZt5fPHBAj9_znsEAB1CEkUuJB_rKYTL6FaK-yzpN2oMcPMb_WWYsjn77TjG38tc7qwIy2WsKd-gWAu2TWczaYLpXMUEsql0xvg3TlVplUZQpfULAC9H34zGWp6wHfbN9XIIrFf_uRZyQ8AChgSHSWdSX-ZddEKOuwWa8fJJyFlErrGss3wDg6ZusOgAHVTPISa43HuNVLA',
-  'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5NzgxODIsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsibG95YWx0eU9iamVjdHMiOlt7ImlkIjoiMzM4ODAwMDAwMDAwMzY1ODg5MS43OVFJWU9RejBlMFMwaDFzdEZBc3REIn1dfSwidHlwIjoic2F2ZXRvYW5kcm9pZHBheSJ9.va8HKGMF6vouqbxKkdbvZ038ZBGMknyZkKVV4xrClYA0GiPaddW1wD5Of5M31P1lXctSuRmnjnL7n1-MI23Wl0H-1AW-xd5_wKqz9hTG-lzX0gFXSa0-45x2S2W0oY8HlDJ-OrhNwwyJIeCWqzRqs20cXCSvhZ-5cpVTDW0KDtslpg7PgNVDUwZM0ZdDZB3FyBDsgku6ja3gc5W35PxZv5Re4Txu4PRoUL4fcIcHCCEELPmnV_mCp85N2VOY1jBKFGIicPGAVW9lYIiJWWe_2wxAhKc1eCcS6u9hvr8xs3rs96VvUeJePnps-Y9olYKxSqRy53IYj0UL7oGyWbiVOw',
-] as const
+// const GOOGLE_WALLET_URLS = [
+//   'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5Nzc1NTcsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsib2ZmZXJPYmplY3RzIjpbeyJpZCI6IjMzODgwMDAwMDAwMDM2NTg4OTEuMURvMFVBTDMwajZ0ekVGc1MzWEI0UCJ9XX0sInR5cCI6InNhdmV0b2FuZHJvaWRwYXkifQ.DhDPawNY7ncDjtLqWlez9iFU9gPwcWjUxHR8JYlqtLZu_Y7ei-iKH61MzXmXq0IS48R-lAVSJca5RHa5h16qyFkMQPtkww4y7VEWofbJdfTsCdR5Ec7QkVapA_od89LttnSjdSFZ1yZOKq_5PkWTVx9F7h6s7rs9t4MXzV5NGq9WdcvPLvcKoR3Y_ZtokVrQS6nb32nCc5RqUNWjaFj_M1AolWClmtZNLkbp-tb2hkBDLN_kwF83acStS70tlEIqym9i72RAQCzYoq-sawCfrHHFLLFG8Q6vchITXOFjShAh_uvGLSJkGp2Z4Auh-GOfZbavpYi_lMvLYmxSc6I-ng',
+//   'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5Nzc1NTcsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsib2ZmZXJPYmplY3RzIjpbeyJpZCI6IjMzODgwMDAwMDAwMDM2NTg4OTEuMURvMFVBTDMwajZ0ekVGc1MzWEI0UCJ9XX0sInR5cCI6InNhdmV0b2FuZHJvaWRwYXkifQ.DhDPawNY7ncDjtLqWlez9iFU9gPwcWjUxHR8JYlqtLZu_Y7ei-iKH61MzXmXq0IS48R-lAVSJca5RHa5h16qyFkMQPtkww4y7VEWofbJdfTsCdR5Ec7QkVapA_od89LttnSjdSFZ1yZOKq_5PkWTVx9F7h6s7rs9t4MXzV5NGq9WdcvPLvcKoR3Y_ZtokVrQS6nb32nCc5RqUNWjaFj_M1AolWClmtZNLkbp-tb2hkBDLN_kwF83acStS70tlEIqym9i72RAQCzYoq-sawCfrHHFLLFG8Q6vchITXOFjShAh_uvGLSJkGp2Z4Auh-GOfZbavpYi_lMvLYmxSc6I-ng',
+//   'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5Nzc4MzgsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsibG95YWx0eU9iamVjdHMiOlt7ImlkIjoiMzM4ODAwMDAwMDAwMzY1ODg5MS41dlNKWDZsYzNjNXhzUUdMWVR0aFhVIn1dfSwidHlwIjoic2F2ZXRvYW5kcm9pZHBheSJ9.P0A12aP2VQVFp1LklEHDkHs0zl-c7mzGxsW0yyOeKGZp1S5YUwYfWQ3wsqSN28ONz3nKeFJowx-8Aks1VU-KiZ4AaqyTx1po8IIr_siJrvnRQAtXDcNffU-jHJXgkgQi8jUD9CM6wvXtZt5fPHBAj9_znsEAB1CEkUuJB_rKYTL6FaK-yzpN2oMcPMb_WWYsjn77TjG38tc7qwIy2WsKd-gWAu2TWczaYLpXMUEsql0xvg3TlVplUZQpfULAC9H34zGWp6wHfbN9XIIrFf_uRZyQ8AChgSHSWdSX-ZddEKOuwWa8fJJyFlErrGss3wDg6ZusOgAHVTPISa43HuNVLA',
+//   'https://pay.google.com/gp/v/save/eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJnb29nbGUiLCJpYXQiOjE3ODc5NzgxODIsImlzcyI6ImV1LXBhc3NraXQtaW9AcGFzc2tpdC1pby5pYW0uZ3NlcnZpY2VhY2NvdW50LmNvbSIsIm9yaWdpbnMiOlsicHViMS5wc2t0LmlvIl0sInBheWxvYWQiOnsibG95YWx0eU9iamVjdHMiOlt7ImlkIjoiMzM4ODAwMDAwMDAwMzY1ODg5MS43OVFJWU9RejBlMFMwaDFzdEZBc3REIn1dfSwidHlwIjoic2F2ZXRvYW5kcm9pZHBheSJ9.va8HKGMF6vouqbxKkdbvZ038ZBGMknyZkKVV4xrClYA0GiPaddW1wD5Of5M31P1lXctSuRmnjnL7n1-MI23Wl0H-1AW-xd5_wKqz9hTG-lzX0gFXSa0-45x2S2W0oY8HlDJ-OrhNwwyJIeCWqzRqs20cXCSvhZ-5cpVTDW0KDtslpg7PgNVDUwZM0ZdDZB3FyBDsgku6ja3gc5W35PxZv5Re4Txu4PRoUL4fcIcHCCEELPmnV_mCp85N2VOY1jBKFGIicPGAVW9lYIiJWWe_2wxAhKc1eCcS6u9hvr8xs3rs96VvUeJePnps-Y9olYKxSqRy53IYj0UL7oGyWbiVOw',
+// ] as const
 
 /** 从数组中随机取一个元素 */
-function randomItem<T>(arr: readonly T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
+// function randomItem<T>(arr: readonly T[]): T {
+//   return arr[Math.floor(Math.random() * arr.length)]
+// }
 
 /** 设备 & 浏览器环境检测 */
 function detectEnv() {
@@ -77,28 +79,28 @@ function AppleIcon() {
   )
 }
 
-function GoogleIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 533.5 544.3">
-      <path
-        d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z"
-        fill="#4285f4"
-      />
-      <path
-        d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 140.3 149.9 243.2 149.9z"
-        fill="#34a853"
-      />
-      <path
-        d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 76.9-38.6 167.5 0 244.4l90.4-70.1z"
-        fill="#fbbc04"
-      />
-      <path
-        d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 75.1 58 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z"
-        fill="#ea4335"
-      />
-    </svg>
-  )
-}
+// function GoogleIcon() {
+//   return (
+//     <svg width="18" height="18" viewBox="0 0 533.5 544.3">
+//       <path
+//         d="M533.5 278.4c0-18.5-1.5-37.1-4.7-55.3H272.1v104.8h147c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-200.2z"
+//         fill="#4285f4"
+//       />
+//       <path
+//         d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 140.3 149.9 243.2 149.9z"
+//         fill="#34a853"
+//       />
+//       <path
+//         d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 76.9-38.6 167.5 0 244.4l90.4-70.1z"
+//         fill="#fbbc04"
+//       />
+//       <path
+//         d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 75.1 58 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z"
+//         fill="#ea4335"
+//       />
+//     </svg>
+//   )
+// }
 
 // ── iOS 非 Safari 引导页 ──
 
@@ -290,12 +292,27 @@ function App() {
   const { ua, isIOS, isAndroid, isIOSNonSafari } = detectEnv()
 
   const handleAppleWallet = useCallback(() => {
-    window.location.href = randomItem(APPLE_PASSES).url
+    window.location.href = KPayPassesUrl
   }, [])
 
-  const handleGoogleWallet = useCallback(() => {
-    window.location.href = randomItem(GOOGLE_WALLET_URLS)
+  const handleAppleWallet1 = useCallback(() => {
+    window.location.href = KPayPassUrl
   }, [])
+
+  const handleAppleWallet2 = useCallback(() => {
+    window.location.href = KPayPassErrorUrl
+  }, [])
+
+  const handleAppleWallet3 = useCallback(() => {
+    // 故意在 URL 上附加 ?mime=application/octet-stream，
+    // 让开发服务器返回错误的 Content-Type（非 application/vnd.apple.pkpass）
+    // 用于实测 iOS Safari 收到错误 MIME 时的真实表现
+    window.location.href = `${KPayPassUrl}?mime=application/octet-stream`
+  }, [])
+
+  // const handleGoogleWallet = useCallback(() => {
+  //   window.location.href = randomItem(GOOGLE_WALLET_URLS)
+  // }, [])
 
   // iOS 非 Safari：整页替换为引导页，不展示任何功能内容
   if (isIOSNonSafari) {
@@ -340,8 +357,35 @@ function App() {
         </button>
       </div>
 
-      {/* ── Google Wallet 区域 ── */}
       <div style={s.card}>
+        <div style={s.cardTitle}>🍎 Apple Wallet</div>
+        <button style={s.appleBtn} onClick={handleAppleWallet1}>
+          <AppleIcon />
+          Add to Apple Wallet
+        </button>
+        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：serialNumber与上方会员卡不一致</div>
+      </div>
+
+      <div style={s.card}>
+        <div style={s.cardTitle}>🍎 Apple Wallet</div>
+        <button style={s.appleBtn} onClick={handleAppleWallet2}>
+          <AppleIcon />
+          Add to Apple Wallet
+        </button>
+        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：添加失敗時的具體表現</div>
+      </div>
+
+      <div style={s.card}>
+        <div style={s.cardTitle}>🍎 Apple Wallet</div>
+        <button style={s.appleBtn} onClick={handleAppleWallet3}>
+          <AppleIcon />
+          Add to Apple Wallet
+        </button>
+        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Content-Type 非 application/vnd.apple.pkpass（返回 application/octet-stream）→ iOS 不弹 Wallet，转为下载文件</div>
+      </div>
+
+      {/* ── Google Wallet 区域 ── */}
+      {/* <div style={s.card}>
         <div style={s.cardTitle}>🤖 Google Wallet</div>
         <button style={s.googleBtn} onClick={handleGoogleWallet}>
           <GoogleIcon />
@@ -352,7 +396,7 @@ function App() {
             <strong>提示</strong>：点击没反应请检查一下当前网络能不能打开Google
           </li>
         </ul>
-      </div>
+      </div> */}
     </div>
   )
 }

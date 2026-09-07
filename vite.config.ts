@@ -12,17 +12,28 @@ export default defineConfig({
   plugins: [
     react(),
 
-    // 为开发服务器的 .pkpass / .pkpasses 请求设置正确的 MIME type
+    // 为开发服务器的 .pkpass / .pkpasses 请求设置 MIME type
     // iOS Safari 依赖 Content-Type 来触发 PassKit 弹框
+    // 默认返回正确的 MIME；若 URL 带 ?mime=xxx 参数，则故意返回该值（用于实测错误的 Content-Type）
     {
       name: 'pass-mime-types',
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           const url = req.url ?? ''
+          const mimeOverride = /[?&]mime=([^&]+)/.exec(url)?.[1]
+          const contentType = mimeOverride
+            ? decodeURIComponent(mimeOverride)
+            : undefined
           if (/\.pkpass(\?|$)/.test(url)) {
-            res.setHeader('Content-Type', 'application/vnd.apple.pkpass')
+            res.setHeader(
+              'Content-Type',
+              contentType ?? 'application/vnd.apple.pkpass',
+            )
           } else if (/\.pkpasses(\?|$)/.test(url)) {
-            res.setHeader('Content-Type', 'application/vnd.apple.pkpasses')
+            res.setHeader(
+              'Content-Type',
+              contentType ?? 'application/vnd.apple.pkpasses',
+            )
           }
           next()
         })
