@@ -12,7 +12,7 @@
  *   - 适用 Android Chrome、微信 Android、桌面 Chrome 等
  */
 
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 
 // ── Apple Wallet：用 Vite ?url 导入，构建时自动处理文件哈希 ──
 // import bayroastPassUrl from './pass/BayroastCoffee.pkpass?url'
@@ -319,42 +319,63 @@ function DeviceTag({ color, children }: { color: string; children: React.ReactNo
 
 function App() {
   const { ua, isIOS, isAndroid, isIOSNonSafari } = detectEnv()
+  const [loading, setLoading] = useState(false)
+
+  // 统一包装：fetch/下载期间显示全屏 loading
+  const runWithLoading = useCallback(async (fn: () => Promise<void>) => {
+    setLoading(true)
+    try {
+      await fn()
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   const handleAppleWallet = useCallback(() => {
-    void openPassWithMime(
-      KPayPassesUrl,
-      'application/vnd.apple.pkpasses',
-      'KPayPass.pkpasses',
+    void runWithLoading(() =>
+      openPassWithMime(
+        KPayPassesUrl,
+        'application/vnd.apple.pkpasses',
+        'KPayPass.pkpasses',
+      ),
     )
-  }, [])
+  }, [runWithLoading])
 
   const handleAppleWallet1 = useCallback(() => {
-    void openPassWithMime(KPayPassUrl, 'application/vnd.apple.pkpass', 'KPayPass.pkpass')
-  }, [])
+    void runWithLoading(() =>
+      openPassWithMime(KPayPassUrl, 'application/vnd.apple.pkpass', 'KPayPass.pkpass'),
+    )
+  }, [runWithLoading])
 
   const handleAppleWallet2 = useCallback(() => {
-    void openPassWithMime(
-      KPayPassErrorUrl,
-      'application/vnd.apple.pkpass',
-      'KPayPassError.pkpass',
+    void runWithLoading(() =>
+      openPassWithMime(
+        KPayPassErrorUrl,
+        'application/vnd.apple.pkpass',
+        'KPayPassError.pkpass',
+      ),
     )
-  }, [])
+  }, [runWithLoading])
 
   const handleAppleWallet3 = useCallback(() => {
     // 纯前端 Blob 方案：以 application/octet-stream 触发，
     // 实测 iOS Safari 收到 octet-stream MIME 时的真实表现
-    void openPassWithMime(
-      KPayPassUrl,
-      'application/octet-stream',
-      'KPayPass.pkpass',
+    void runWithLoading(() =>
+      openPassWithMime(
+        KPayPassUrl,
+        'application/octet-stream',
+        'KPayPass.pkpass',
+      ),
     )
-  }, [])
+  }, [runWithLoading])
 
   const handleAppleWallet4 = useCallback(() => {
     // 纯前端 Blob 方案：以 application/zip 触发，
     // 实测 iOS Safari 收到 zip MIME 时的真实表现
-    void openPassWithMime(KPayPassUrl, 'application/zip', 'KPayPass.pkpass')
-  }, [])
+    void runWithLoading(() =>
+      openPassWithMime(KPayPassUrl, 'application/zip', 'KPayPass.pkpass'),
+    )
+  }, [runWithLoading])
 
   // const handleGoogleWallet = useCallback(() => {
   //   window.location.href = randomItem(GOOGLE_WALLET_URLS)
@@ -379,6 +400,14 @@ function App() {
   return (
     <div style={s.page}>
       <h1 style={s.pageTitle}>🎫 Wallet Pass Demo</h1>
+
+      {/* ── 全屏 loading：点击示例按钮下载卡券时显示 ── */}
+      {loading && (
+        <div style={s.loadingOverlay}>
+          <div style={s.loadingSpinner} />
+          <div style={s.loadingText}>正在准备卡券…</div>
+        </div>
+      )}
 
       {/* ── 设备信息卡片 ── */}
       <div style={s.card}>
@@ -473,6 +502,37 @@ const s: Record<string, React.CSSProperties> = {
     marginTop: 0,
     marginBottom: 24,
     letterSpacing: -0.3,
+  },
+  // 全屏 loading 遮罩
+  loadingOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 9999,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    background: 'rgba(0,0,0,0.55)',
+    backdropFilter: 'blur(2px)',
+    WebkitBackdropFilter: 'blur(2px)',
+    color: '#fff',
+  },
+  loadingSpinner: {
+    width: 44,
+    height: 44,
+    borderRadius: '50%',
+    border: '4px solid rgba(255,255,255,0.3)',
+    borderTopColor: '#fff',
+    animation: 'wallet-loading-spin 0.8s linear infinite',
+  },
+  loadingText: {
+    fontSize: 15,
+    fontWeight: 600,
+    letterSpacing: 0.5,
   },
   card: {
     background: '#ffffff',
