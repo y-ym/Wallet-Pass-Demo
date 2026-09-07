@@ -310,6 +310,13 @@ function App() {
     window.location.href = `${KPayPassUrl}?mime=application/octet-stream`
   }, [])
 
+  const handleAppleWallet4 = useCallback(() => {
+    // 故意在 URL 上附加 ?mime=application/zip，
+    // 让开发服务器返回 Content-Type: application/zip
+    // 用于实测 iOS Safari 收到 zip MIME 时是否/如何唤醒 Wallet 弹框
+    window.location.href = `${KPayPassUrl}?mime=application/zip`
+  }, [])
+
   // const handleGoogleWallet = useCallback(() => {
   //   window.location.href = randomItem(GOOGLE_WALLET_URLS)
   // }, [])
@@ -381,7 +388,16 @@ function App() {
           <AppleIcon />
           Add to Apple Wallet
         </button>
-        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Content-Type 非 application/vnd.apple.pkpass（返回 application/octet-stream）→ iOS 不弹 Wallet，转为下载文件</div>
+        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Content-Type 非 application/vnd.apple.pkpass（返回 application/octet-stream）。实测：iOS 仍会唤醒 Wallet 弹框——Safari 会按 .pkpass 扩展名兜底识别；仅部分 iOS 版本表现为"转为下载文件"</div>
+      </div>
+
+      <div style={s.card}>
+        <div style={s.cardTitle}>🍎 Apple Wallet</div>
+        <button style={s.appleBtn} onClick={handleAppleWallet4}>
+          <AppleIcon />
+          Add to Apple Wallet
+        </button>
+        <div style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 2.2, color: '#555' }}><strong>提示</strong>：Content-Type 非 application/vnd.apple.pkpass（返回 application/zip）。实测观察：iOS 是否仍唤醒 Wallet 弹框 / 是否转为下载 .zip 归档</div>
       </div>
 
       {/* ── Google Wallet 区域 ── */}
